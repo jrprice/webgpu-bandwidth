@@ -1,5 +1,3 @@
-import shaders from './shaders.wgsl'
-
 // Benchmark parameters.
 // TODO: Make these configurable.
 let arraySize = 8 * 1024 * 1024;
