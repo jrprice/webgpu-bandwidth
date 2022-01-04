@@ -196,7 +196,12 @@ fn store(i : u32, value : u32) {
   setStatus(name, `Validating...`);
   await validate(name, type, bytesPerElement);
 
-  setStatus(name, (end - start).toFixed(1) + ' ms');
+  // Output the runtime and achieved bandwidth.
+  const ms = end - start;
+  const dataMoved = arraySize * bytesPerElement * 2 * iterations;
+  const bytesPerSecond = dataMoved / (ms / 1000.0);
+  const gbytesPerSecond = (bytesPerSecond * 1e-9).toFixed(1);
+  setStatus(name, ms.toFixed(1) + ` ms  (${gbytesPerSecond} GB/s)`);
 }
 
 async function validate(name: string, type: Type, bytesPerElement: number) {
