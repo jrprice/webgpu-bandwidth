@@ -104,7 +104,7 @@ fn store(i : u32, value : u32) {
   }
 `
 
-  // Create the compute pipelines.
+  // Create the compute pipeline.
   const module = device.createShaderModule({ code: wgsl });
   const pipeline = device.createComputePipeline({
     compute: {
@@ -216,10 +216,9 @@ async function validate(type: Type, bytesPerElement: number) {
     stagingBuffer, 0,
     arraySize * bytesPerElement);
   queue.submit([commandEncoder.finish()]);
-  await stagingBuffer.mapAsync(
-    GPUMapMode.READ, 0, arraySize * bytesPerElement).then(
-      null, () => setStatus('Failed to map buffer.'));
-  const mapped = stagingBuffer.getMappedRange(0, arraySize * bytesPerElement);
+  await stagingBuffer.mapAsync(GPUMapMode.READ).then(
+    null, () => setStatus('Failed to map buffer.'));
+  const mapped = stagingBuffer.getMappedRange();
 
   // Check that all values are correct.
   let values;
