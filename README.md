@@ -3,6 +3,8 @@ WebGPU memory bandwidth benchmark
 
 A simple memory bandwidth benchmark implemented with WebGPU.
 
+https://jrprice.github.io/webgpu-bandwidth
+
 
 Building
 --------
