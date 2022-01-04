@@ -109,7 +109,7 @@ fn store(i : u32, value : u32) {
 
   // Construct the full shader source.
   let wgsl = `
-  struct Array {
+  [[block]] struct Array {
     data : array<${storeType}>;
   };
   [[group(0), binding(0)]] var<storage, read_write> in : Array;
