@@ -27,10 +27,22 @@ var Type;
 const run = () => __awaiter(this, void 0, void 0, function* () {
     // Initialize the WebGPU device.
     const powerPref = document.getElementById('powerpref');
+    if (!navigator.gpu) {
+        setStatus(null, 'WebGPU not supported (or bad Origin Trial token).');
+        return;
+    }
     const adapter = yield navigator.gpu.requestAdapter({
         powerPreference: powerPref.selectedOptions[0].value,
     });
+    if (!adapter) {
+        setStatus(null, 'Failed to get a WebGPU adapter.');
+        return;
+    }
     device = yield adapter.requestDevice();
+    if (!device) {
+        setStatus(null, 'Failed to get a WebGPU device.');
+        return;
+    }
     queue = device.queue;
     // Get the selected number from a drop-down menu.
     const getSelectedNumber = (id) => {
@@ -248,6 +260,11 @@ function validate(name, type, bytesPerElement) {
     });
 }
 function setStatus(name, status) {
-    document.getElementById(name + "-status").innerHTML = status;
+    if (name) {
+        document.getElementById(name + "-status").innerHTML = status;
+    }
+    else {
+        document.getElementById("status").innerHTML = status;
+    }
 }
 document.querySelector('#run').addEventListener('click', run);
