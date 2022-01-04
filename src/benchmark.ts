@@ -18,8 +18,6 @@ enum Type {
 };
 
 const run = async () => {
-  setStatus('Initializing...');
-
   // Initialize the WebGPU device.
   const adapter = await navigator.gpu.requestAdapter();
   device = await adapter.requestDevice();
@@ -28,8 +26,6 @@ const run = async () => {
   await run_single(Type.Int32);
   await run_single(Type.Int16);
   await run_single(Type.Int8);
-
-  setStatus('Finished.');
 }
 
 const run_single = async (type: Type) => {
@@ -191,20 +187,19 @@ fn store(i : u32, value : u32) {
   initEncoder.endPass();
 
   // Submit the commands.
-  setStatus(`Running ${name}...`);
+  setStatus(name, `Running...`);
   const start = performance.now();
   queue.submit([commandEncoder.finish()]);
   await queue.onSubmittedWorkDone();
   const end = performance.now();
 
-  // TODO: Display in page.
-  console.log(`${name} runtime (ms): ${end - start}`);
+  setStatus(name, `Validating...`);
+  await validate(name, type, bytesPerElement);
 
-  setStatus(`Validating ${name} ...`);
-  await validate(type, bytesPerElement);
+  setStatus(name, (end - start).toFixed(1) + ' ms');
 }
 
-async function validate(type: Type, bytesPerElement: number) {
+async function validate(name: string, type: Type, bytesPerElement: number) {
   // Map the final output onto the host.
   const stagingBuffer = device.createBuffer({
     size: arraySize * bytesPerElement,
@@ -217,7 +212,7 @@ async function validate(type: Type, bytesPerElement: number) {
     arraySize * bytesPerElement);
   queue.submit([commandEncoder.finish()]);
   await stagingBuffer.mapAsync(GPUMapMode.READ).then(
-    null, () => setStatus('Failed to map buffer.'));
+    null, () => setStatus(name, 'Failed to map buffer.'));
   const mapped = stagingBuffer.getMappedRange();
 
   // Check that all values are correct.
@@ -238,13 +233,13 @@ async function validate(type: Type, bytesPerElement: number) {
       values.findIndex((value: number, index: number) => value !== iterations);
     console.log(
       "Error at index " + idx + ": " + values[idx] + " != " + iterations);
-    setStatus("Validation failed.");
+    setStatus(name, "Validation failed.");
     throw 'validation failed';
   }
 }
 
-function setStatus(status: string) {
-  document.getElementById("status").innerHTML = status;
+function setStatus(name: string, status: string) {
+  document.getElementById(name + "-status").innerHTML = status;
 }
 
 document.querySelector('#run').addEventListener('click', run);
