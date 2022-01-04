@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>WebGPU memory bandwidth benchmark</title>
+</head>
+
+<body>
+  <h1>WebGPU memory bandwidth benchmark</h1>
+  <script type="module" src="src/benchmark.js"></script>
+
+  A simple memory bandwidth benchmark that executes a the following statement in
+  a 1D compute shader:
+  <pre>  a[i] = b[i] + 1</pre>
+  where <i>i</i> is the global invocation index.
+  <br />
+  The data is cycled through three different storage buffers, over many
+  iterations.
+  <br />
+  Loads and stores for data types that are not supported by the target device
+  are emulated using atomics.
+
+  <hr />
+  <label for="powerpref">Power preference:</label>
+  <select name="powerpref" id="powerpref" style="font-size: 80%;">
+    <option value="high-performance" selected="selected">high-performance</option>
+    <option value="low-power">low-power</option>
+  </select>
+  <br />
+  <label for="arraysize">Array sizes (elements):</label>
+  <select name="arraysize" id="arraysize" style="font-size: 80%;">
+    <option value="64">64 million</option>
+    <option value="32">32 million</option>
+    <option value="16">16 million</option>
+    <option value="8" selected="selected">8 million</option>
+    <option value="4">4 million</option>
+    <option value="2">2 million</option>
+    <option value="1">1 million</option>
+  </select>
+  <br />
+  <label for="wgsize">Workgroup size:</label>
+  <select name="wgsize" id="wgsize" style="font-size: 80%;">
+    <option value="256" selected="selected">256</option>
+    <option value="128">128</option>
+    <option value="64">64</option>
+    <option value="32">32</option>
+    <option value="16">16</option>
+  </select>
+  <br />
+  <label for="iterations">Benchmark iterations:</label>
+  <select name="iterations" id="iterations" style="font-size: 80%;">
+    <option value="1000" selected="selected">1000</option>
+    <option value="500">500</option>
+    <option value="200">200</option>
+    <option value="100">100</option>
+    <option value="10">10</option>
+  </select>
+  <br />
+  <br />
+  <button id="run">Run</button>
+  <br />
+
+  <hr />
+  <table>
+    <tr>
+      <th style="text-align: left;">Data type&nbsp;&nbsp;&nbsp;</th>
+      <th style="text-align: left;">Result</th>
+    </tr>
+    <tr>
+      <td>Int32</td>
+      <td id="Int32-status">Ready.</td>
+    </tr>
+    <tr>
+      <td>Int16</td>
+      <td id="Int16-status">Ready.</td>
+    </tr>
+    <tr>
+      <td>Int8</td>
+      <td id="Int8-status">Ready.</td>
+    </tr>
+  </table>
+</body>
+
+</html>
