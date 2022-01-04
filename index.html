@@ -10,6 +10,18 @@
   <h1>WebGPU memory bandwidth benchmark</h1>
   <script type="module" src="src/benchmark.js"></script>
 
+  A simple memory bandwidth benchmark that executes a the following statement in
+  a 1D compute shader:
+  <pre>  a[i] = b[i] + 1</pre>
+  where <i>i</i> is the global invocation index.
+  <br />
+  The data is cycled through three different storage buffers, over many
+  iterations.
+  <br />
+  Loads and stores for data types that are not supported by the target device
+  are emulated using atomics.
+
+  <hr />
   <label for="powerpref">Power preference:</label>
   <select name="powerpref" id="powerpref" style="font-size: 80%;">
     <option value="high-performance" selected="selected">high-performance</option>
@@ -48,7 +60,8 @@
   <br />
   <button id="run">Run</button>
   <br />
-  <br />
+
+  <hr />
   <table>
     <tr>
       <th style="text-align: left;">Data type&nbsp;&nbsp;&nbsp;</th>
