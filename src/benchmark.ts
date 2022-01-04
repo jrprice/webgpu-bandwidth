@@ -1,8 +1,7 @@
 // Benchmark parameters.
-// TODO: Make these configurable.
-let arraySize = 8 * 1024 * 1024;
-let workgroupSize = 256; // TODO: Use overridable constant to set in shader.
-let iterations = 250;
+let arraySize;
+let workgroupSize;
+let iterations;
 
 // WebGPU objects.
 let device: GPUDevice = null;
@@ -19,9 +18,21 @@ enum Type {
 
 const run = async () => {
   // Initialize the WebGPU device.
-  const adapter = await navigator.gpu.requestAdapter();
+  const powerPref = <HTMLSelectElement>document.getElementById('powerpref');
+  const adapter = await navigator.gpu.requestAdapter({
+    powerPreference: <GPUPowerPreference>powerPref.selectedOptions[0].value,
+  });
   device = await adapter.requestDevice();
   queue = device.queue;
+
+  // Get the selected number from a drop-down menu.
+  const getSelectedNumber = (id: string) => {
+    let list = <HTMLSelectElement>document.getElementById(id);
+    return Number(list.selectedOptions[0].value);
+  };
+  arraySize = getSelectedNumber('arraysize') * 1024 * 1024;
+  workgroupSize = getSelectedNumber('wgsize');
+  iterations = getSelectedNumber('iterations');
 
   await run_single(Type.Int32);
   await run_single(Type.Int16);
@@ -93,7 +104,7 @@ fn store(i : u32, value : u32) {
   [[group(0), binding(1)]] var<storage, read_write> out : Array;`
   wgsl += loadStore;
   wgsl += `
-  [[stage(compute), workgroup_size(256)]]
+  [[stage(compute), workgroup_size(${workgroupSize})]]
   fn run([[builtin(global_invocation_id)]] gid : vec3<u32>) {
     let i = gid.x;
     store(i, load(i) + 1u);
@@ -222,22 +233,25 @@ async function validate(name: string, type: Type, bytesPerElement: number) {
 
   // Check that all values are correct.
   let values;
+  let ref = iterations;
   switch (type) {
     case Type.Int8:
       values = new Uint8Array(mapped);
+      ref %= 256;
       break;
     case Type.Int16:
       values = new Uint16Array(mapped);
+      ref %= 65536;
       break;
     case Type.Int32:
       values = new Uint32Array(mapped);
       break;
   }
-  if (!values.every((value: number) => value === iterations)) {
+  if (!values.every((value: number) => value === ref)) {
     const idx =
-      values.findIndex((value: number, index: number) => value !== iterations);
+      values.findIndex((value: number, index: number) => value !== ref);
     console.log(
-      "Error at index " + idx + ": " + values[idx] + " != " + iterations);
+      "Error at index " + idx + ": " + values[idx] + " != " + ref);
     setStatus(name, "Validation failed.");
     throw 'validation failed';
   }
