@@ -12,7 +12,7 @@
   <h1>WebGPU memory bandwidth benchmark</h1>
   <script type="module" src="src/benchmark.js"></script>
 
-  A simple memory bandwidth benchmark that executes a the following statement in
+  A simple memory bandwidth benchmark that executes the following statement in
   a 1D compute shader:
   <pre>  a[i] = b[i] + 1</pre>
   where <i>i</i> is the global invocation index.
@@ -65,6 +65,7 @@
   <br />
 
   <hr />
+  <pre style="font-size: 150%;">
   <table>
     <tr>
       <th style="text-align: left;">Data type&nbsp;&nbsp;&nbsp;</th>
@@ -72,17 +73,18 @@
     </tr>
     <tr>
       <td>Int32</td>
-      <td id="Int32-status">Ready.</td>
+      <td id="Int32-status"></td>
     </tr>
     <tr>
       <td>Int16</td>
-      <td id="Int16-status">Ready.</td>
+      <td id="Int16-status"></td>
     </tr>
     <tr>
       <td>Int8</td>
-      <td id="Int8-status">Ready.</td>
+      <td id="Int8-status"></td>
     </tr>
   </table>
+</pre>
 </body>
 
 </html>

@@ -223,8 +223,9 @@ fn store(i : u32, value : u32) {
   const ms = end - start;
   const dataMoved = arraySize * bytesPerElement * 2 * iterations;
   const bytesPerSecond = dataMoved / (ms / 1000.0);
-  const gbytesPerSecond = (bytesPerSecond * 1e-9).toFixed(1);
-  setStatus(name, ms.toFixed(1) + ` ms  (${gbytesPerSecond} GB/s)`);
+  const msStr = ms.toFixed(1).padStart(7);
+  const gbsStr = (bytesPerSecond*1e-9).toFixed(1).padStart(6);
+  setStatus(name, msStr + ` ms   ${gbsStr} GB/s`);
 }
 
 async function validate(name: string, type: Type, bytesPerElement: number) {
