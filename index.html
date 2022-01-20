@@ -50,12 +50,21 @@
     <option value="16">16</option>
   </select>
   <br />
-  <label for="iterations">Benchmark iterations:</label>
-  <select name="iterations" id="iterations" style="font-size: 80%;">
+  <label for="iterations">Benchmark iterations (coalesced):</label>
+  <select name="iterations" id="iterations-coalesced" style="font-size: 80%;">
     <option value="1000" selected="selected">1000</option>
     <option value="500">500</option>
     <option value="200">200</option>
     <option value="100">100</option>
+    <option value="10">10</option>
+  </select>
+  <br />
+  <label for="iterations">Benchmark iterations (random access):</label>
+  <select name="iterations" id="iterations-random" style="font-size: 80%;">
+    <option value="200">100</option>
+    <option value="100">100</option>
+    <option value="50" selected="selected">50</option>
+    <option value="20">20</option>
     <option value="10">10</option>
   </select>
   <br />

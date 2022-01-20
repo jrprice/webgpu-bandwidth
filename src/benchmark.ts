@@ -1,7 +1,8 @@
 // Benchmark parameters.
 let arraySize;
 let workgroupSize;
-let iterations;
+let iterationsCoalesced;
+let iterationsRandom;
 
 // WebGPU objects.
 let device: GPUDevice = null;
@@ -51,7 +52,8 @@ const run = async () => {
   };
   arraySize = getSelectedNumber('arraysize') * 1024 * 1024;
   workgroupSize = getSelectedNumber('wgsize');
-  iterations = getSelectedNumber('iterations');
+  iterationsCoalesced = getSelectedNumber('iterations-coalesced');
+  iterationsRandom = getSelectedNumber('iterations-random');
 
   // Generate two random index buffers.
   indexBuffer1 = device.createBuffer({
@@ -95,6 +97,7 @@ const run_single = async (type: Type, pattern: Pattern) => {
   // Generate the type-specific parts of the shader.
   let name = '<unknown>';
   let bytesPerElement = 0;
+  let iterations = 0;
   let storeType = '<not-set>';
   let loadStore = '';
   switch (type) {
@@ -152,10 +155,12 @@ fn store(i : u32, value : u32) {
   switch (pattern) {
     case Pattern.coalesced:
       name += "-coalesced";
+      iterations = iterationsCoalesced;
       index = `gid.x`;
       break;
     case Pattern.random:
       name += "-random";
+      iterations = iterationsRandom;
       index = `indices.data[gid.x]`;
       break;
   }
@@ -261,7 +266,7 @@ fn store(i : u32, value : u32) {
   const end = performance.now();
 
   setStatus(name, `Validating...`);
-  await validate(name, type, bytesPerElement);
+  await validate(name, type, bytesPerElement, iterations);
 
   // Output the runtime and achieved bandwidth.
   const ms = end - start;
@@ -276,7 +281,11 @@ fn store(i : u32, value : u32) {
   setStatus(name, result);
 }
 
-async function validate(name: string, type: Type, bytesPerElement: number) {
+async function validate(
+  name: string,
+  type: Type,
+  bytesPerElement: number,
+  iterations: number) {
   // Map the final output onto the host.
   const stagingBuffer = device.createBuffer({
     size: arraySize * bytesPerElement,
