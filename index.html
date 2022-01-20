@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="origin-trial"
-    content="Apc69NpjNxgl1yPgTSIjWz9K70bcKEUwPrLpPkdfSxl+N8pZmA5xC+RwlWqE5sSoDHwJ5QzBVQfVZbN4L5LDXwgAAABReyJvcmlnaW4iOiJodHRwczovL2pycHJpY2UuZ2l0aHViLmlvOjQ0MyIsImZlYXR1cmUiOiJXZWJHUFUiLCJleHBpcnkiOjE2NDMxNTUxOTl9">
+    content="As2PzHE+OlOCOFIemBq+qv1xuPHCF9v7/tHyFBUGYAtj/VgCjhWjZ5w/HeG9c/e0H2PwCoJdfOLvddiBReuIDgcAAABReyJvcmlnaW4iOiJodHRwczovL2pycHJpY2UuZ2l0aHViLmlvOjQ0MyIsImZlYXR1cmUiOiJXZWJHUFUiLCJleHBpcnkiOjE2NTI4MzE5OTl9">
   <title>WebGPU memory bandwidth benchmark</title>
 </head>
 
@@ -32,13 +32,16 @@
   <br />
   <label for="arraysize">Array sizes (elements):</label>
   <select name="arraysize" id="arraysize" style="font-size: 80%;">
-    <option value="64">64 million</option>
-    <option value="32">32 million</option>
-    <option value="16">16 million</option>
-    <option value="8" selected="selected">8 million</option>
-    <option value="4">4 million</option>
-    <option value="2">2 million</option>
-    <option value="1">1 million</option>
+    <option value="100000">100 million</option>
+    <option value="50000">50 million</option>
+    <option value="20000">20 million</option>
+    <option value="10000" selected="selected">10 million</option>
+    <option value="5000">5 million</option>
+    <option value="2000">2 million</option>
+    <option value="1000">1 million</option>
+    <option value="500">500 thousand</option>
+    <option value="200">200 thousand</option>
+    <option value="100">100 thousand</option>
   </select>
   <br />
   <label for="wgsize">Workgroup size:</label>
@@ -50,12 +53,23 @@
     <option value="16">16</option>
   </select>
   <br />
-  <label for="iterations">Benchmark iterations:</label>
-  <select name="iterations" id="iterations" style="font-size: 80%;">
+  <label for="iterations">Benchmark iterations (coalesced):</label>
+  <select name="iterations" id="iterations-coalesced" style="font-size: 80%;">
     <option value="1000" selected="selected">1000</option>
     <option value="500">500</option>
     <option value="200">200</option>
     <option value="100">100</option>
+    <option value="10">10</option>
+  </select>
+  <br />
+  <label for="iterations">Benchmark iterations (random access):</label>
+  <select name="iterations" id="iterations-random" style="font-size: 80%;">
+    <option value="1000">1000</option>
+    <option value="500">500</option>
+    <option value="200">200</option>
+    <option value="100">100</option>
+    <option value="50" selected="selected">50</option>
+    <option value="20">20</option>
     <option value="10">10</option>
   </select>
   <br />
@@ -68,20 +82,43 @@
   <pre style="font-size: 150%;">
   <table>
     <tr>
-      <th style="text-align: left;">Data type&nbsp;&nbsp;&nbsp;</th>
+      <th style="text-align: left;">Data type&nbsp;&nbsp;</th>
+      <th style="text-align: left;">Pattern&nbsp;&nbsp;&nbsp;&nbsp;</th>
       <th style="text-align: left;">Result</th>
     </tr>
+
     <tr>
       <td>Int32</td>
-      <td id="Int32-status"></td>
+      <td>coalesced</td>
+      <td id="Int32-coalesced-status"></td>
     </tr>
     <tr>
       <td>Int16</td>
-      <td id="Int16-status"></td>
+      <td>coalesced</td>
+      <td id="Int16-coalesced-status"></td>
     </tr>
     <tr>
       <td>Int8</td>
-      <td id="Int8-status"></td>
+      <td>coalesced</td>
+      <td id="Int8-coalesced-status"></td>
+    </tr>
+
+    <tr><td><br/></td></tr>
+
+    <tr>
+      <td>Int32</td>
+      <td>random</td>
+      <td id="Int32-random-status"></td>
+    </tr>
+    <tr>
+      <td>Int16</td>
+      <td>random</td>
+      <td id="Int16-random-status"></td>
+    </tr>
+    <tr>
+      <td>Int8</td>
+      <td>random</td>
+      <td id="Int8-random-status"></td>
     </tr>
   </table>
 </pre>
