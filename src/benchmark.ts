@@ -50,7 +50,7 @@ const run = async () => {
     let list = <HTMLSelectElement>document.getElementById(id);
     return Number(list.selectedOptions[0].value);
   };
-  arraySize = getSelectedNumber('arraysize') * 1024 * 1024;
+  arraySize = getSelectedNumber('arraysize') * 1024;
   workgroupSize = getSelectedNumber('wgsize');
   iterationsCoalesced = getSelectedNumber('iterations-coalesced');
   iterationsRandom = getSelectedNumber('iterations-random');
