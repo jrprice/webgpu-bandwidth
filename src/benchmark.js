@@ -92,7 +92,7 @@ const run = () => __awaiter(this, void 0, void 0, function* () {
     indexBuffer1.unmap();
     indexBuffer2.unmap();
     // Run all the benchmarks.
-    for (const pattern of [Pattern.coalesced]) {
+    for (const pattern of [Pattern.coalesced, Pattern.random]) {
         yield run_single(Type.Int32, pattern);
         yield run_single(Type.Int16, pattern);
         yield run_single(Type.Int8, pattern);
@@ -122,54 +122,34 @@ fn store(i : u32, value : u32) {
         case Type.Int16:
             name = 'Int16';
             bytesPerElement = 2;
-            storeType = 'u32';
+            storeType = 'atomic<u32>';
             loadStore = `
-fn load(i : u32) -> vec2<u32> {
-  let word = in.data[i];
-  var ret : vec2<u32>;
-  ret.x = (word >> 16u) & 0xFFFFu;
-  ret.y = (word) & 0xFFFFu;
-  return ret;
-  // return (word >> ((i%4u)*8u)) & 0xFFu;
+fn load(i : u32) -> u32 {
+  let word = atomicLoad(&in.data[i / 2u]);
+  return (word >> ((i%2u)*16u)) & 0xFFFFu;
 }
-fn store(i : u32, value : vec2<u32>) {
-  var v = 0u;
-  v = v | ((value.x & 0xFFFFu) << 16u);
-  v = v | ((value.y & 0xFFFFu));
-  out.data[i] = v;
-  // let prev = atomicLoad(&out.data[i / 4u]);
-  // let shift = (i % 4u) * 8u;
-  // let mask = (prev ^ (value<<shift)) & (0xFFu << shift);
-  // atomicXor(&out.data[i / 4u], mask);
+fn store(i : u32, value : u32) {
+  let prev = atomicLoad(&out.data[i / 2u]);
+  let shift = (i % 2u) * 16u;
+  let mask = (prev ^ (value<<shift)) & (0xFFFFu << shift);
+  atomicXor(&out.data[i / 2u], mask);
 }
     `;
             break;
         case Type.Int8:
             name = 'Int8';
             bytesPerElement = 1;
-            storeType = 'u32';
+            storeType = 'atomic<u32>';
             loadStore = `
-fn load(i : u32) -> vec4<u32> {
-  let word = in.data[i];
-  var ret : vec4<u32>;
-  ret.x = (word >> 24u);
-  ret.y = (word >> 16u) & 0xFFu;
-  ret.z = (word >> 8u) & 0xFFu;
-  ret.w = (word) & 0xFFu;
-  return ret;
-  // return (word >> ((i%4u)*8u)) & 0xFFu;
+fn load(i : u32) -> u32 {
+  let word = atomicLoad(&in.data[i / 4u]);
+  return (word >> ((i%4u)*8u)) & 0xFFu;
 }
-fn store(i : u32, value : vec4<u32>) {
-  var v = 0u;
-  v = v | ((value.x & 0xFFu) << 24u);
-  v = v | ((value.y & 0xFFu) << 16u);
-  v = v | ((value.z & 0xFFu) << 8u);
-  v = v | ((value.w & 0xFFu));
-  out.data[i] = v;
-  // let prev = atomicLoad(&out.data[i / 4u]);
-  // let shift = (i % 4u) * 8u;
-  // let mask = (prev ^ (value<<shift)) & (0xFFu << shift);
-  // atomicXor(&out.data[i / 4u], mask);
+fn store(i : u32, value : u32) {
+  let prev = atomicLoad(&out.data[i / 4u]);
+  let shift = (i % 4u) * 8u;
+  let mask = (prev ^ (value<<shift)) & (0xFFu << shift);
+  atomicXor(&out.data[i / 4u], mask);
 }
     `;
             break;
@@ -261,7 +241,7 @@ fn store(i : u32, value : vec4<u32>) {
         const initEncoder = commandEncoder.beginComputePass();
         initEncoder.setPipeline(pipeline);
         initEncoder.setBindGroup(0, bindGroups[0]);
-        initEncoder.dispatch(arraySize / workgroupSize / (4 / bytesPerElement));
+        initEncoder.dispatch(arraySize / workgroupSize);
         initEncoder.endPass();
         queue.submit([commandEncoder.finish()]);
         yield queue.onSubmittedWorkDone();
@@ -272,7 +252,7 @@ fn store(i : u32, value : vec4<u32>) {
     initEncoder.setPipeline(pipeline);
     for (let i = 0; i < iterations; i++) {
         initEncoder.setBindGroup(0, bindGroups[i % 3]);
-        initEncoder.dispatch(arraySize / workgroupSize / (4 / bytesPerElement));
+        initEncoder.dispatch(arraySize / workgroupSize);
     }
     initEncoder.endPass();
     // Submit the commands.
