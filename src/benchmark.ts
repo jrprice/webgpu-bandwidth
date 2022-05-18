@@ -243,7 +243,7 @@ fn store(i : u32, value : u32) {
     initEncoder.setPipeline(pipeline);
     initEncoder.setBindGroup(0, bindGroups[0]);
     initEncoder.dispatch(arraySize / workgroupSize);
-    initEncoder.endPass();
+    initEncoder.end();
     queue.submit([commandEncoder.finish()]);
     await queue.onSubmittedWorkDone();
   }
@@ -256,7 +256,7 @@ fn store(i : u32, value : u32) {
     initEncoder.setBindGroup(0, bindGroups[i % 3]);
     initEncoder.dispatch(arraySize / workgroupSize);
   }
-  initEncoder.endPass();
+  initEncoder.end();
 
   // Submit the commands.
   setStatus(name, `Running...`);
