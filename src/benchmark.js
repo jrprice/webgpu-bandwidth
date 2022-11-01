@@ -112,10 +112,10 @@ const run_single = (type, pattern) => __awaiter(this, void 0, void 0, function* 
             storeType = 'u32';
             loadStore = `
 fn load(i : u32) -> u32 {
-  return in.data[i];
+  return in[i];
 }
 fn store(i : u32, value : u32) {
-  out.data[i] = value;
+  out[i] = value;
 }
     `;
             break;
@@ -165,24 +165,18 @@ fn store(i : u32, value : u32) {
         case Pattern.random:
             name += "-random";
             iterations = iterationsRandom;
-            index = `indices.data[gid.x]`;
+            index = `indices[gid.x]`;
             break;
     }
     // Construct the full shader source.
     let wgsl = `
-  [[block]] struct Array {
-    data : array<${storeType}>;
-  };
-  [[block]] struct IndexArray {
-    data : array<u32>;
-  };
-  [[group(0), binding(0)]] var<storage, read_write> in : Array;
-  [[group(0), binding(1)]] var<storage, read_write> out : Array;
-  [[group(0), binding(2)]] var<storage, read_write> indices : IndexArray;`;
+  @group(0) @binding(0) var<storage, read_write> in : array<${storeType}>;
+  @group(0) @binding(1) var<storage, read_write> out : array<${storeType}>;
+  @group(0) @binding(2) var<storage, read_write> indices : array<u32>;`;
     wgsl += loadStore;
     wgsl += `
-  [[stage(compute), workgroup_size(${workgroupSize})]]
-  fn run([[builtin(global_invocation_id)]] gid : vec3<u32>) {
+  @stage(compute) @workgroup_size(${workgroupSize})
+  fn run(@builtin(global_invocation_id) gid : vec3<u32>) {
     let i = ${index};
     store(i, load(i) + 1u);
   }
@@ -194,6 +188,7 @@ fn store(i : u32, value : u32) {
             module: module,
             entryPoint: 'run',
         },
+        layout: "auto",
     });
     // Create the buffers.
     aBuffer = device.createBuffer({
@@ -241,7 +236,7 @@ fn store(i : u32, value : u32) {
         const initEncoder = commandEncoder.beginComputePass();
         initEncoder.setPipeline(pipeline);
         initEncoder.setBindGroup(0, bindGroups[0]);
-        initEncoder.dispatch(arraySize / workgroupSize);
+        initEncoder.dispatchWorkgroups(arraySize / workgroupSize);
         initEncoder.end();
         queue.submit([commandEncoder.finish()]);
         yield queue.onSubmittedWorkDone();
@@ -252,7 +247,7 @@ fn store(i : u32, value : u32) {
     initEncoder.setPipeline(pipeline);
     for (let i = 0; i < iterations; i++) {
         initEncoder.setBindGroup(0, bindGroups[i % 3]);
-        initEncoder.dispatch(arraySize / workgroupSize);
+        initEncoder.dispatchWorkgroups(arraySize / workgroupSize);
     }
     initEncoder.end();
     // Submit the commands.
