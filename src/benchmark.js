@@ -125,14 +125,14 @@ fn store(i : u32, value : u32) {
             storeType = 'atomic<u32>';
             loadStore = `
 fn load(i : u32) -> u32 {
-  let word = atomicLoad(&in.data[i / 2u]);
+  let word = atomicLoad(&in[i / 2u]);
   return (word >> ((i%2u)*16u)) & 0xFFFFu;
 }
 fn store(i : u32, value : u32) {
-  let prev = atomicLoad(&out.data[i / 2u]);
+  let prev = atomicLoad(&out[i / 2u]);
   let shift = (i % 2u) * 16u;
   let mask = (prev ^ (value<<shift)) & (0xFFFFu << shift);
-  atomicXor(&out.data[i / 2u], mask);
+  atomicXor(&out[i / 2u], mask);
 }
     `;
             break;
@@ -142,14 +142,14 @@ fn store(i : u32, value : u32) {
             storeType = 'atomic<u32>';
             loadStore = `
 fn load(i : u32) -> u32 {
-  let word = atomicLoad(&in.data[i / 4u]);
+  let word = atomicLoad(&in[i / 4u]);
   return (word >> ((i%4u)*8u)) & 0xFFu;
 }
 fn store(i : u32, value : u32) {
-  let prev = atomicLoad(&out.data[i / 4u]);
+  let prev = atomicLoad(&out[i / 4u]);
   let shift = (i % 4u) * 8u;
   let mask = (prev ^ (value<<shift)) & (0xFFu << shift);
-  atomicXor(&out.data[i / 4u], mask);
+  atomicXor(&out[i / 4u], mask);
 }
     `;
             break;
@@ -175,7 +175,7 @@ fn store(i : u32, value : u32) {
   @group(0) @binding(2) var<storage, read_write> indices : array<u32>;`;
     wgsl += loadStore;
     wgsl += `
-  @stage(compute) @workgroup_size(${workgroupSize})
+  @compute @workgroup_size(${workgroupSize})
   fn run(@builtin(global_invocation_id) gid : vec3<u32>) {
     let i = ${index};
     store(i, load(i) + 1u);
